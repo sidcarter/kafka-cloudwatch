@@ -4,7 +4,7 @@ A clojure app to push kafka lag metrics to cloudwatch
 
 ## Installation
 
-Download from http://example.com/FIXME.
+Download from http://github.com/sidcarter/kafka-cloudwatch
 
 ## Usage
 
@@ -16,7 +16,7 @@ Accepts [broker-hosts] and [chroot-path] as the first and second arguments respe
 
 ### Bugs
 
-lots?
+Lots of em...
 
 ## License
 
