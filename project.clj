@@ -7,8 +7,8 @@
 
   :jvm-opts ["-Dlog4j.configuration=file:log4j.properties"]
 
-  :dependencies [[org.clojure/clojure "1.7.0"]
-                 [clj-kafka "0.3.2"]
+  :dependencies [[org.clojure/clojure "1.8.0"]
+                 [clj-kafka "0.3.4"]
                  [org.clojure/tools.cli "0.3.3"]]
 
   :main ^:skip-aot kafka-cloudwatch.core

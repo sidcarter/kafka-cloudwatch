@@ -4,32 +4,32 @@
   (:gen-class kafka-cloudwatch.core))
 
 (defn broker-config
-  [hosts]
-  {"zookeeper.connect" (str hosts ":2181")
+  [zkhosts]
+  {"zookeeper.connect" (str zkhosts ":2181")
    "group.id" "clj-kafka.consumer"})
 
 (defn get-brokers
-  [hosts]
-  (zk/brokers (broker-config hosts)))
+  [zkhosts]
+  (zk/brokers (broker-config zkhosts)))
 
 (defn get-all-topics
-  [hosts]
-  (zk/topics (broker-config hosts)))
+  [zkhosts]
+  (zk/topics (broker-config zkhosts)))
 
 (defn get-partitions-for-topic
-  [hosts topic]
-  (zk/partitions (broker-config hosts) topic))
+  [zkhosts topic]
+  (zk/partitions (broker-config zkhosts) topic))
 
 (defn print-all-partitions
-  [hosts]
-  (let [topics (get-all-topics hosts)]
+  [zkhosts]
+  (let [topics (get-all-topics zkhosts)]
     (doseq [topic topics]
-      (println (str "topic: " topic ", partitions: " (get-partitions-for-topic hosts topic))))))
+      (println (str "topic: " topic ", partitions: " (get-partitions-for-topic zkhosts topic))))))
 
 (defn -main
-  "I don't do a whole lot ... yet."
+  "Just the basic stuff for now."
   [& args]
-  (let [hosts (first *command-line-args*)
+  (let [zkhosts (first *command-line-args*)
         chroot (second *command-line-args*)]
-    (when hosts
-      (print-all-partitions hosts))))
+    (when zkhosts
+      (print-all-partitions zkhosts))))
