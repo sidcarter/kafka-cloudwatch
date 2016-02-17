@@ -1,7 +1,7 @@
 (ns kafka-cloudwatch.core
   (:require [clojure.tools.cli :refer [parse-opts]]
-            [clj-kafka.zk :as zk]
             [clj-kafka.offset :as offset]
+            [zookeeper :as zk]
             [clojure.tools.cli :refer [parse-opts]]
             [clojure.string :as string])
   (:gen-class kafka-cloudwatch.core))
@@ -27,40 +27,38 @@
 
 (defn broker-config
   [zkhosts]
-  {"zookeeper.connect" zkhosts
-   "group.id" "clj-kafka.consumer"})
+  {"zookeeper.connect" zkhosts})
 
-(defn get-brokers
+(defn zk-client
   [zkhosts]
-  (zk/brokers (broker-config zkhosts)))
+  (zk/connect zkhosts))
 
-(defn get-all-topics
+(defn brokers
+  [zkhosts]
+  (zk/children (zk-client zkhosts) "/brokers"))
+
+(defn consumers
+  [zkhosts]
+  (zk/children (zk-client zkhosts) "/consumers"))
+
+(defn topics
   ([zkhosts]
-    (zk/topics (broker-config zkhosts)))
+    (zk/children (zk-client zkhosts) "/brokers/topics"))
   ([zkhosts option]
     (when (= option "show")
-      (doseq [topic (get-all-topics zkhosts)]
+      (doseq [topic (topics zkhosts)]
         (println topic)))))
 
-(defn get-partitions-for-topic
+(defn partitions-for-topic
   [zkhosts topic]
-  (zk/partitions (broker-config zkhosts) topic))
-
-(defn get-offsets-for-topic
-  [zkhosts topic]
-  (offset/fetch-consumer-offsets zkhosts (broker-config zkhosts) topic topic))
+  (zk/children (zk-client zkhosts) (str "/brokers/topics/" topic "/partitions")))
 
 (defn print-all-partitions
   [zkhosts]
-  (let [topics (get-all-topics zkhosts)]
+  (let [topics (topics zkhosts)]
     (doseq [topic topics]
-      (println (str "topic: " topic ", partitions: " (get-partitions-for-topic zkhosts topic))))))
-
-(defn print-all-offsets
-  [zkhosts]
-  (let [topics (get-all-topics zkhosts)]
-    (doseq [topic topics]
-      (println (str "topic: " topic ", partitions: " (get-offsets-for-topic zkhosts topic))))))
+      (doseq [partition (partitions-for-topic zkhosts topic)]
+               (println (str "topic: " topic ", partitions: " partition))))))
 
 (defn -main
   "I am the main."
@@ -68,8 +66,7 @@
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
     (cond (:list options)
       (case (:list options)
-        "brokers" (println (get-brokers (:zookeeper options)))
-        "topics" (get-all-topics (:zookeeper options) "show")
-        "partitions" (println (get-brokers (:zookeeper options)))
-        "offsets" (print-all-offsets (:zookeeper options))
+        "brokers" (println (brokers (:zookeeper options)))
+        "topics" (topics (:zookeeper options) "show")
+        "partitions" (println (print-all-partitions (:zookeeper options)))
         (print_usage summary)))))

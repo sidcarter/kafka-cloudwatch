@@ -9,6 +9,7 @@
 
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [clj-kafka "0.3.4"]
+                 [zookeeper-clj "0.9.1"]
                  [org.clojure/tools.cli "0.3.3"]]
 
   :main ^:skip-aot kafka-cloudwatch.core
